@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.14)  # for add_link_options and implicit target
 project("bitnet.cpp" C CXX)
 include(CheckIncludeFileCXX)
 
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Focus on static libs")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
@@ -20,6 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED true)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+set(GGML_OPENMP OFF)
 
 # override ggml options
 set(GGML_BITNET_ARM_TL1    ${BITNET_ARM_TL1})
@@ -69,9 +71,17 @@ write_basic_package_version_file(
     VERSION ${LLAMA_INSTALL_VERSION}
     COMPATIBILITY SameMajorVersion)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LlamaConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/LlamaConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Llama)
+install(TARGETS llama LIBRARY PUBLIC_HEADER DESTINATION ${LLAMA_LIB_INSTALL_DIR} COMPONENT Runtime)
+install(TARGETS llama ARCHIVE PUBLIC_HEADER DESTINATION ${LLAMA_LIB_INSTALL_DIR} COMPONENT Devel)
+install(TARGETS llama RUNTIME PUBLIC_HEADER DESTINATION ${LLAMA_BIN_INSTALL_DIR} COMPONENT Runtime)
 
-set_target_properties(llama PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/llama.h)
+install(FILES include/ggml-bitnet.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Devel)
+
+# install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LlamaConfig.cmake
+#               ${CMAKE_CURRENT_BINARY_DIR}/LlamaConfigVersion.cmake
+#         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Llama)
+
+# set_target_properties(llama PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/llama.h)
+# set_target_properties(llama PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/llama-model.h)
+# set_target_properties(llama PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/common.h)
 install(TARGETS llama LIBRARY PUBLIC_HEADER)
